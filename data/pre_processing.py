@@ -1,9 +1,3 @@
-# ----------------------------
-# Prepare training data from Metadata file
-# ----------------------------
-import pandas as pd
-from pathlib import Path
-
 import math, random
 import torch
 import torchaudio
@@ -133,36 +127,3 @@ class AudioUtil():
             aug_spec = transforms.TimeMasking(time_mask_param)(aug_spec, mask_value)
         
         return aug_spec
-
-download_path = Path.cwd()/'UrbanSound8K'
-
-print("download_path:",download_path)
-# Read metadata file
-metadata_file = download_path/'metadata'/'UrbanSound8K.csv'
-df = pd.read_csv(metadata_file)
-print(df.head())
-
-# Construct file path by concatenating fold and file name
-df['relative_path'] = '/fold' + df['fold'].astype(str) + '/' + df['slice_file_name'].astype(str)
-
-# Take relevant columns
-df = df[['relative_path', 'classID']]
-print(df.head())
-
-data_path = 'UrbanSound8K/audio/'
-
-idx = 1
-audio_file = data_path + df.loc[idx, 'relative_path']
-class_id = df.loc[idx, 'classID']
-
-aud = AudioUtil.open(audio_file)
-reaud = AudioUtil.resample(aud, 44100)
-rechan = AudioUtil.rechannel(reaud, 2)
-
-dur_aud = AudioUtil.pad_trunc(rechan, 4000)
-shift_aud = AudioUtil.time_shift(dur_aud, 0.4)
-sgram = AudioUtil.spectro_gram(shift_aud, n_mels=64, n_fft=1024, hop_len=None)
-aug_sgram = AudioUtil.spectro_augment(sgram, max_mask_pct=0.1, n_freq_masks=2, n_time_masks=2)
-
-
-print(aug_sgram)
