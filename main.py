@@ -13,14 +13,14 @@ from data import DInterface
 def load_callbacks():
     callbacks = []
     callbacks.append(plc.EarlyStopping(
-        monitor='val_acc',
+        monitor='val_loss',
         mode='max',
         patience=10,
         min_delta=0.001
     ))
 
     callbacks.append(plc.ModelCheckpoint(
-        monitor='val_acc',
+        monitor='val_loss',
         filename='best-{epoch:02d}-{val_acc:.3f}',
         save_top_k=1,
         mode='max',
