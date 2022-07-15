@@ -3,7 +3,8 @@ import importlib
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, random_split
 import torchvision.transforms as transforms
-from satup_data import *
+from .setup_data import *
+import pandas as pd
 
 class DInterface(pl.LightningDataModule):
 
@@ -13,6 +14,7 @@ class DInterface(pl.LightningDataModule):
         super().__init__()
         self.num_workers = num_workers
         self.dataset = dataset
+        self.data_dir = './UrbanSound8K/audio'
         self.kwargs = kwargs
         self.batch_size = kwargs['batch_size']
         #self.load_data_module()
@@ -20,7 +22,12 @@ class DInterface(pl.LightningDataModule):
     def setup(self, stage=None):
         # Assign train/val datasets for use in dataloaders
         if stage == 'fit' or stage is None:
-            myds = SoundDS(self.df, self.data_dir)
+            metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
+            df = pd.read_csv(metadata_file) 
+            df['relative_path'] = '/fold' + df['fold'].astype(str) + '/' + df['slice_file_name'].astype(str)
+            df = df[['relative_path', 'classID']]
+
+            myds = SoundDS(df, self.data_dir)
             num_items = len(myds)
             num_train = round(num_items * 0.8)
             num_val = num_items - num_train

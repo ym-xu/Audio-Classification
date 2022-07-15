@@ -3,17 +3,18 @@ import torch
 import importlib
 from torch.nn import functional as F
 import torch.optim.lr_scheduler as lrs
-
+from torch import nn
 import pytorch_lightning as pl
+from torch.nn import init
 
 # ----------------------------
 # Audio Classification Model
 # ----------------------------
-class AudioClassifier (pl.LightningDataModule):
+class MInterface(pl.LightningModule):
     # ----------------------------
     # Build the model architecture
     # ----------------------------
-    def __init__(self):
+    def __init__(self, model_name, loss, lr, **kargs):
         super().__init__()
         conv_layers = []
 
@@ -73,19 +74,30 @@ class AudioClassifier (pl.LightningDataModule):
         # Final output
         return x
 
+    def cross_entropy_loss(self, logits, labels):
+        return F.nll_loss(logits, labels)
+
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         logits = self.forward(x)
-        loss = self.CrossEntropyLoss(logits, y)
+        loss = self.cross_entropy_loss(logits, y)
         self.log('train_loss', loss)
+        
         return loss
 
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
         logits = self.forward(x)
-        loss = self.CrossEntropyLoss(logits, y)
+        loss = self.cross_entropy_loss(logits, y)
+
+        label_digit = y.argmax(axis=1)
+        out_digit = torch.max(logits,1).argmax(axis=1)
+        correct_num = sum(label_digit == out_digit).cpu().item()
+        
         self.log('val_loss', loss)
+        self.log('val_acc', correct_num/len(out_digit),
+                 on_step=False, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
-        sreturn optimizer
+        return optimizer
