@@ -90,13 +90,13 @@ class MInterface(pl.LightningModule):
         logits = self.forward(x)
         loss = self.cross_entropy_loss(logits, y)
 
-        label_digit = y.argmax(axis=1)
-        out_digit = torch.max(logits,1).argmax(axis=1)
-        correct_num = sum(label_digit == out_digit).cpu().item()
+        #label_digit = y.argmax(axis=1)
+        #out_digit = torch.max(logits,1).argmax(axis=1)
+        #correct_num = sum(label_digit == out_digit).cpu().item()
         
         self.log('val_loss', loss)
-        self.log('val_acc', correct_num/len(out_digit),
-                 on_step=False, on_epoch=True, prog_bar=True)
+        #self.log('val_acc', correct_num/len(out_digit),
+        #         on_step=False, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
