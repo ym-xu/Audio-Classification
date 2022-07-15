@@ -1,5 +1,7 @@
+import torch
 import torch.nn.functional as F
 from torch.nn import init
+from torch import nn
 
 # ----------------------------
 # Audio Classification Model
@@ -67,10 +69,3 @@ class AudioClassifier (nn.Module):
 
         # Final output
         return x
-
-# Create the model and put it on the GPU if available
-myModel = AudioClassifier()
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-myModel = myModel.to(device)
-# Check that it is on Cuda
-next(myModel.parameters()).device

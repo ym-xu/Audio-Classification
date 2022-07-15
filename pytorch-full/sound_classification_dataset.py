@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader, Dataset, random_split
 import torchaudio
-
+from audio_util_load import *
 # ----------------------------
 # Sound Dataset
 # ----------------------------
@@ -11,7 +11,7 @@ class SoundDS(Dataset):
         self.duration = 4000
         self.sr = 44100
         self.channel = 2
-    self.shift_pct = 0.4
+        self.shift_pct = 0.4
             
 # ----------------------------
 # Number of items in dataset
@@ -43,4 +43,4 @@ class SoundDS(Dataset):
         sgram = AudioUtil.spectro_gram(shift_aud, n_mels=64, n_fft=1024, hop_len=None)
         aug_sgram = AudioUtil.spectro_augment(sgram, max_mask_pct=0.1, n_freq_masks=2, n_time_masks=2)
 
-    return aug_sgram, class_id
+        return aug_sgram, class_id
